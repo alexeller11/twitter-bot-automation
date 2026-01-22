@@ -2,18 +2,15 @@
 # -*- coding: utf-8 -*-
 import os
 import json
+import requests
 import pytz
 from datetime import datetime
-from requests_oauthlib import OAuth1Session
 
 # Configurar timezone para Brasil
 br_tz = pytz.timezone('America/Sao_Paulo')
 
-# Inicializar tokens Twitter OAuth 1.0a
-consumer_key = os.getenv('TWITTER_API_KEY', '')
-consumer_secret = os.getenv('TWITTER_API_KEY_SECRET', '')
-access_token = os.getenv('TWITTER_ACCESS_TOKEN', '')
-access_token_secret = os.getenv('TWITTER_ACCESS_TOKEN_SECRET', '')
+# Inicializar tokens
+bearer_token = os.getenv('TWITTER_BEARER_TOKEN', '')
 openai_api_key = os.getenv('OPENAI_API_KEY', '')
 
 def generate_tweet_content():
@@ -46,40 +43,47 @@ def generate_tweet_content():
         return "Vamos criar conteúdo incrível hoje! 💪 #marketing"
 
 def publish_tweet(content):
-    """Publica tweet usando Twitter API OAuth 1.0a."""
+    """Publica tweet usando Twitter API v2 com Bearer Token."""
+    if not bearer_token:
+        print("❌ ERRO: TWITTER_BEARER_TOKEN não está definido")
+        return False
+    
     try:
-        # Criar sessão OAuth 1.0a
-        oauth = OAuth1Session(
-            consumer_key,
-            client_secret=consumer_secret,
-            resource_owner_key=access_token,
-            resource_owner_secret=access_token_secret,
-            signature_type='auth_header'
-        )
-        
-        # Endpoint da Twitter API v2
+        # URL endpoint da Twitter API v2
         url = "https://api.twitter.com/2/tweets"
         
+        # Headers com Bearer Token
+        headers = {
+            "Authorization": f"Bearer {bearer_token}",
+            "Content-Type": "application/json",
+        }
+        
+        # Payload do tweet
         payload = {"text": content[:280]}
         
-        response = oauth.post(
+        # Fazer requisição
+        response = requests.post(
             url,
             json=payload,
-            headers={"Content-Type": "application/json"}
+            headers=headers
         )
         
         if response.status_code == 201:
-            print(f"Tweet publicado com sucesso: {response.json()}")
+            print(f"✅ Tweet publicado com sucesso: {response.json()}")
             return True
+        elif response.status_code == 401:
+            print(f"❌ ERRO 401: Twitter Bearer Token inválido ou expirado")
+            print(f"Resposta: {response.text}")
+            return False
         else:
-            print(f"Erro ao publicar tweet: {response.status_code} - {response.text}")
+            print(f"❌ ERRO {response.status_code} ao publicar tweet: {response.text}")
             return False
     except Exception as e:
-        print(f"Erro fatal ao publicar: {e}")
+        print(f"❌ Erro fatal ao publicar: {e}")
         raise
 
 if __name__ == "__main__":
-    print("Iniciando publicacao de tweet...")
+    print("\n🔍 Iniciando publicacao de tweet...\n")
     tweet_content = generate_tweet_content()
     print(f"Conteudo gerado: {tweet_content}")
     publish_tweet(tweet_content)
