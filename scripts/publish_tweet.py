@@ -42,8 +42,7 @@ def generate_tweet_content():
         return response.choices[0].message.content.strip()
     except Exception as e:
         print(f"Erro ao gerar conteudo com OpenAI: {e}")
-        return "Bom dia! Vamos crescer juntos! 🚀 #Marketing #Automacao"return "Bom dia! Vamos crescer juntos! 🚀 #Marketing #Automacao"
-
+        return "Bom dia! Vamos crescer juntos! 🚀 #Marketing #Automacao"
 def publish_tweet(content):
     """Publica o tweet na sua conta do Twitter."""
     try:
