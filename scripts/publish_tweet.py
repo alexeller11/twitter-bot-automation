@@ -6,6 +6,7 @@ import requests
 from datetime import datetime
 import pytz
 import json
+import openai
 
 # Configurar timezone para Brasil
 br_tz = pytz.timezone('America/Sao_Paulo')
