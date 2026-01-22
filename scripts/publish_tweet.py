@@ -32,25 +32,17 @@ def generate_tweet_content():
         else:  # Noite
             prompt_text = "Generate an inspiring evening reflection in Portuguese about business growth and success. Keep it short (280 chars max)."
         
-        url = "https://api.openai.com/v1/chat/completions"
-        headers = {
-            "Authorization": f"Bearer {openai_api_key}",
-            "Content-Type": "application/json"
-        }
-        payload = {
-            "model": "gpt-3.5-turbo",
-            "messages": [{"role": "user", "content": prompt_text}],
-            "max_tokens": 50
-        }
-        
-        response = requests.post(url, json=payload, headers=headers)
-        response.raise_for_status()
-        data = response.json()
-        
-        return data['choices'][0]['message']['content'].strip()
+        client = openai.OpenAI(api_key=openai_api_key)
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt_text}],
+            max_tokens=50
+        )
+
+        return response.choices[0].message.content.strip()
     except Exception as e:
         print(f"Erro ao gerar conteudo com OpenAI: {e}")
-        return "Bom dia! Vamos crescer juntos! 🚀 #Marketing #Automacao"
+        return "Bom dia! Vamos crescer juntos! 🚀 #Marketing #Automacao"return "Bom dia! Vamos crescer juntos! 🚀 #Marketing #Automacao"
 
 def publish_tweet(content):
     """Publica o tweet na sua conta do Twitter."""
